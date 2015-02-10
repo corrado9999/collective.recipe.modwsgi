@@ -26,8 +26,13 @@ if sys.version_info >= (2, 6):
 else:
     from paste.script.util.logging_config import fileConfig
 
+from os import getenv
+configfile = getenv('PASTE_CONF_FILE')
+if not configfile:
+    configfile = %(config)r
+if not configfile:
+    raise RuntimeError("Paste configuration file has not been given neither in the buildout.cfg nor in the PASTE_CONF_FILE environmental variable")
 
-configfile = "%(config)s"
 try:
     fileConfig(configfile)
 except configparser.NoSectionError:
@@ -44,9 +49,8 @@ class Recipe(object):
         self.logger = logging.getLogger(self.name)
 
         if "config-file" not in options:
-            self.logger.error(
-                    "You need to specify either a paste configuration file")
-            raise zc.buildout.UserError("No paste configuration given")
+            self.logger.warning(
+                    "Paste configuration file not specified, remember to set the PASTE_CONF_FILE environmental variable on execution")
 
         if "target" in options:
             location = os.path.dirname(options["target"])
@@ -71,7 +75,7 @@ class Recipe(object):
             app_name = '"%s"' % app_name
 
         output = WRAPPER_TEMPLATE % dict(
-            config=self.options["config-file"],
+            config=self.options.get("config-file"),
             syspath=",\n    ".join((repr(p) for p in path)),
             app_name=app_name
             )
