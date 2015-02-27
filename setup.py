@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '2.2dev'
+version = '2.2rc1'
 
 setup(name='collective.recipe.modwsgi',
       version=version,
